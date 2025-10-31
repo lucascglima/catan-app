@@ -1,0 +1,117 @@
+version: '3.9'
+
+services:
+  # Supabase Local (PostgreSQL + Auth + Realtime + Storage)
+  postgres:
+    image: supabase/postgres:15.1.1.54
+    container_name: catan-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: catan_dev
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./apps/api/src/infrastructure/database/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - catan-network
+
+  # Redis (Upstash compatible - local development)
+  redis:
+    image: redis:7-alpine
+    container_name: catan-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass catan_redis_pass
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - catan-network
+
+  # Supabase Studio (Database UI)
+  studio:
+    image: supabase/studio:20231123-64a766a
+    container_name: catan-studio
+    restart: unless-stopped
+    ports:
+      - "54323:3000"
+    environment:
+      SUPABASE_URL: http://kong:8000
+      STUDIO_PG_META_URL: http://meta:8080
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzA0MDcyMDAsImV4cCI6MTk4NTk4MzIwMH0.YZwo7CYJVrz6dKmOOOdE5qvQvDqxGzqcqWS5QTGWFZE
+      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvY2FsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY3MDQwNzIwMCwiZXhwIjoxOTg1OTgzMjAwfQ.cZJqaB7ZKRM6GVxCqrqXhYZy9W2k9JoFdLpfN7wBD3U
+    depends_on:
+      - postgres
+    networks:
+      - catan-network
+
+  # API Backend (Node.js)
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: catan-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/catan_dev
+      REDIS_URL: redis://:catan_redis_pass@redis:6379
+      JWT_SECRET: catan-local-jwt-secret-change-in-production
+      CORS_ORIGIN: http://localhost:3000
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - catan-network
+
+  # Frontend (Next.js) - Opcional, pode rodar fora do Docker
+  # web:
+  #   build:
+  #     context: ./apps/web
+  #     dockerfile: Dockerfile.dev
+  #   container_name: catan-web
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     NEXT_PUBLIC_API_URL: http://localhost:3001
+  #     NEXT_PUBLIC_WS_URL: ws://localhost:3001
+  #     NEXT_PUBLIC_SUPABASE_URL: http://localhost:54323
+  #     NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzA0MDcyMDAsImV4cCI6MTk4NTk4MzIwMH0.YZwo7CYJVrz6dKmOOOdE5qvQvDqxGzqcqWS5QTGWFZE
+  #   volumes:
+  #     - ./apps/web:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   depends_on:
+  #     - api
+  #   networks:
+  #     - catan-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  catan-network:
+    driver: bridge

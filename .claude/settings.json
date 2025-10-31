@@ -1,0 +1,63 @@
+{
+  "projectName": "catan-mvp",
+  "description": "Full-stack multiplayer board game with clean architecture",
+  "version": "1.0.0",
+
+  "stack": {
+    "frontend": "Next.js 15 + React 19 + TypeScript + Radix UI + Tailwind CSS 4",
+    "backend": "Node.js 22 + TypeScript + Express + Socket.io",
+    "database": "Supabase PostgreSQL",
+    "cache": "Upstash Redis (local: Redis)",
+    "orm": "Supabase JS SDK",
+    "monorepo": "Turborepo",
+    "containerization": "Docker + Docker Compose"
+  },
+
+  "architecture": {
+    "pattern": "Clean Architecture",
+    "layers": ["domain", "application", "infrastructure", "presentation"],
+    "naming": "kebab-case for files/folders, PascalCase for classes/interfaces",
+    "imports": "Absolute paths via tsconfig paths"
+  },
+
+  "conventions": {
+    "naming": {
+      "files": "kebab-case",
+      "folders": "kebab-case",
+      "classes": "PascalCase",
+      "interfaces": "PascalCase (with I prefix for interfaces in domain layer)",
+      "types": "PascalCase",
+      "functions": "camelCase",
+      "constants": "UPPER_SNAKE_CASE",
+      "components": "PascalCase folders with index.tsx"
+    },
+    "structure": {
+      "frontend": "Feature-based with colocation",
+      "backend": "Clean architecture layers",
+      "shared": "Packages for cross-cutting concerns"
+    },
+    "testing": {
+      "unit": "Jest for business logic",
+      "integration": "Supertest for API",
+      "e2e": "Playwright (future)",
+      "coverage": ">80% for game-engine package"
+    }
+  },
+
+  "env": {
+    "development": {
+      "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/catan_dev",
+      "REDIS_URL": "redis://:catan_redis_pass@localhost:6379",
+      "NEXT_PUBLIC_API_URL": "http://localhost:3001",
+      "NEXT_PUBLIC_WS_URL": "ws://localhost:3001",
+      "NODE_ENV": "development",
+      "PORT": 3001
+    },
+    "production": {
+      "DATABASE_URL": "Use Supabase connection string",
+      "REDIS_URL": "Use Upstash Redis URL",
+      "NEXT_PUBLIC_API_URL": "Your Railway/Render URL",
+      "NODE_ENV": "production"
+    }
+  }
+}
