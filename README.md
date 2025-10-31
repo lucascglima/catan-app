@@ -1,104 +1,110 @@
-Perfeito 👍 — com base no arquivo `SETUP_CATAN.MD`, aqui está um **`README.md` completo e profissional** para o projeto **Catan MVP**, resumindo toda a estrutura, stack e instruções de execução do setup que o arquivo define:
+# 🎲 Catan MVP - Full Stack Multiplayer Board Game
+
+O **Catan MVP** é um projeto **full stack** que recria o clássico jogo de tabuleiro *Catan* com suporte a **multiplayer em tempo real** e **modo single-player com inteligência artificial**. Ele foi projetado com uma **arquitetura limpa**, **monorepo** e tecnologias modernas, visando escalabilidade, desempenho e organização de código.
 
 ---
 
-```markdown
-# 🎲 Catan MVP - Full Stack Multiplayer Board Game
+## 🚀 Visão Geral
 
-Um MVP completo e moderno do jogo **Catan**, desenvolvido com uma arquitetura **clean**, **monorepo**, e suporte a **modo multiplayer** e **single player com IA**.
+Este MVP (Minimum Viable Product) fornece uma base completa para desenvolvimento de jogos baseados em tabuleiros, integrando:
+
+* Autenticação e gerenciamento de jogadores via Supabase.
+* Sincronização em tempo real com Socket.io.
+* Persistência em banco PostgreSQL e cache em Redis.
+* Motor de regras de jogo (game engine) modular e testável.
 
 ---
 
 ## 🧱 Stack Tecnológica
 
-| Camada | Tecnologias |
-|:--|:--|
-| **Frontend** | Next.js 15 • React 19 • TypeScript • Radix UI • Tailwind CSS 4 |
-| **Backend** | Node.js 22 • Express • Socket.io • TypeScript |
-| **Database** | Supabase PostgreSQL |
-| **Cache** | Upstash Redis (Redis local em dev) |
-| **Infraestrutura** | Turborepo • Docker • Docker Compose |
-| **Arquitetura** | Clean Architecture (Domain, Application, Infrastructure, Presentation) |
+| Camada             | Tecnologias                                                            |
+| :----------------- | :--------------------------------------------------------------------- |
+| **Frontend**       | Next.js 15 · React 19 · TypeScript · Radix UI · Tailwind CSS 4         |
+| **Backend**        | Node.js 22 · Express · Socket.io · TypeScript                          |
+| **Banco de Dados** | Supabase PostgreSQL                                                    |
+| **Cache**          | Upstash Redis (ou Redis local para dev)                                |
+| **Infraestrutura** | Turborepo · Docker · Docker Compose                                    |
+| **Arquitetura**    | Clean Architecture (Domain, Application, Infrastructure, Presentation) |
 
 ---
 
-## 🧩 Estrutura do Projeto (Monorepo)
+## 🧩 Estrutura do Monorepo
 
 ```
-
 catan-mvp/
 ├── apps/
-│   ├── web/      → Frontend (Next.js)
-│   └── api/      → Backend (Express + Socket.io)
+│   ├── web/          → Frontend (Next.js)
+│   └── api/          → Backend (Express + Socket.io)
 ├── packages/
-│   ├── game-engine/ → Motor de regras e IA
-│   ├── types/       → Tipos compartilhados
-│   └── ui/          → Componentes compartilhados
-├── .github/         → CI/CD (GitHub Actions)
+│   ├── game-engine/  → Regras, lógica de jogo e IA
+│   ├── types/        → Tipos e interfaces compartilhadas
+│   └── ui/           → Componentes visuais reutilizáveis
+├── .github/          → Workflows de CI/CD
 ├── docker-compose.yml
 ├── turbo.json
 └── package.json
-
 ```
+
+Cada workspace é independente, com seu próprio `package.json`, `tsconfig.json` e scripts de build/test.
 
 ---
 
-## 🏗️ Arquitetura
+## 🧭 Arquitetura Limpa (Clean Architecture)
 
-O projeto segue **Clean Architecture**, isolando camadas e responsabilidades:
+A aplicação segue os princípios de **Clean Architecture**, garantindo separação de responsabilidades e baixo acoplamento:
 
 ```
-
 Domain → Application → Infrastructure → Presentation
+```
 
-````
+* **Domain** → Entidades, regras de negócio e objetos de valor (sem dependências externas)
+* **Application** → Casos de uso e orquestração da lógica de negócio
+* **Infrastructure** → Implementações de repositórios, integrações e serviços externos (Supabase, Redis)
+* **Presentation** → Controladores HTTP, WebSockets, e UI (Next.js)
 
-- **Domain** → Entidades e regras puras do jogo (sem dependências externas)
-- **Application** → Casos de uso (ex: criar partida, rolar dados, trocar recursos)
-- **Infrastructure** → Persistência (Supabase), cache (Redis), WebSocket handlers
-- **Presentation** → Controladores HTTP, rotas Express, páginas Next.js
+Essa divisão permite testar cada camada de forma isolada e escalar o projeto facilmente.
 
 ---
 
-## ⚙️ Setup do Ambiente
+## ⚙️ Configuração do Ambiente de Desenvolvimento
 
-### 1️⃣ Clonar o projeto
+### 1. Clonar o repositório
+
 ```bash
 git clone https://github.com/seu-usuario/catan-mvp.git
 cd catan-mvp
-````
+```
 
-### 2️⃣ Instalar dependências
+### 2. Instalar dependências
 
 ```bash
 npm install
 ```
 
-### 3️⃣ Configurar variáveis de ambiente
+### 3. Configurar variáveis de ambiente
 
-Copie os exemplos:
+Copie os arquivos de exemplo:
 
 ```bash
 cp apps/web/.env.local.example apps/web/.env.local
 cp apps/api/.env.example apps/api/.env
 ```
 
-Atualize as chaves Supabase/Redis conforme necessário.
+Edite as variáveis com suas chaves Supabase e configurações Redis.
 
-### 4️⃣ Subir os serviços Docker
+### 4. Subir os serviços com Docker
 
 ```bash
 docker-compose up -d
 ```
 
-Isso iniciará:
+Serviços:
 
-* PostgreSQL (porta 5432)
-* Redis (porta 6379)
-* Supabase Studio (porta 54323)
-* API (porta 3001, se configurada)
+* PostgreSQL → `localhost:5432`
+* Redis → `localhost:6379`
+* Supabase Studio → `localhost:54323`
 
-### 5️⃣ Migrar e popular o banco
+### 5. Migrar e popular o banco de dados
 
 ```bash
 cd apps/api
@@ -106,11 +112,13 @@ npm run db:migrate
 npm run db:seed   # opcional
 ```
 
-### 6️⃣ Rodar os servidores de desenvolvimento
+### 6. Rodar em modo de desenvolvimento
 
 ```bash
 npm run dev
 ```
+
+Acesse:
 
 * **Frontend:** [http://localhost:3000](http://localhost:3000)
 * **API:** [http://localhost:3001/health](http://localhost:3001/health)
@@ -120,14 +128,14 @@ npm run dev
 
 ## 🧠 Pacote `@catan-mvp/game-engine`
 
-Implementa a lógica central do jogo:
+Implementa toda a lógica central do jogo:
 
-* Geração de tabuleiro
-* Regras de construção, recursos e comércio
-* Gerenciador de turnos
-* Estratégias de IA (random, medium, hard)
+* Geração procedural do tabuleiro.
+* Regras de construção, recursos e comércio.
+* Sistema de turnos e vitória.
+* Inteligência artificial com três níveis de dificuldade.
 
-Rodar testes:
+### Executar testes
 
 ```bash
 cd packages/game-engine
@@ -136,105 +144,113 @@ npm run test
 
 ---
 
-## 💾 Banco e Cache
+## 🧪 Testes e Qualidade de Código
 
-**Supabase PostgreSQL**
-
-* Usado para persistência de jogos e jogadores
-  **Redis (Upstash ou local)**
-* Usado para cache de sessões e estado em tempo real
-
----
-
-## 🧪 Testes
-
-* **Unitários:** Jest (game-engine e API)
+* **Unitários:** Jest (domínio e motor de jogo)
 * **Integração:** Supertest (API)
 * **E2E:** Playwright (planejado)
-* Cobertura mínima esperada: **80%** no `game-engine`
+* **Cobertura:** >80% no `game-engine`
+
+### Lint e formatação
+
+```bash
+npm run lint
+npm run format
+```
 
 ---
 
-## 🚀 Deploy
+## 🧰 Comandos Principais
 
-### Frontend
-
-* **Plataforma:** [Vercel](https://vercel.com)
-* Variáveis:
-
-  * `NEXT_PUBLIC_API_URL`
-  * `NEXT_PUBLIC_WS_URL`
-  * `NEXT_PUBLIC_SUPABASE_URL`
-  * `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-
-### Backend
-
-* **Plataforma:** Railway ou Render
-* Variáveis:
-
-  * `DATABASE_URL`
-  * `REDIS_URL`
-  * `JWT_SECRET`
-  * `CORS_ORIGIN`
-  * `NODE_ENV=production`
+| Comando               | Descrição                                         |
+| :-------------------- | :------------------------------------------------ |
+| `npm run dev`         | Executa todos os serviços (web + api) em modo dev |
+| `npm run build`       | Compila todos os pacotes com o Turborepo          |
+| `npm run test`        | Roda todos os testes unitários e integração       |
+| `npm run docker:up`   | Sobe os containers Docker                         |
+| `npm run docker:down` | Encerra os containers Docker                      |
+| `npm run db:migrate`  | Executa migrações do banco                        |
+| `npm run db:seed`     | Popula o banco com dados iniciais                 |
+| `npm run lint`        | Analisa o código com ESLint                       |
+| `npm run clean`       | Remove builds e cache                             |
 
 ---
 
-## 🧭 Convenções e Boas Práticas
+## ☁️ Deploy e Infraestrutura
 
-* **Nomenclatura:**
+### Frontend (Vercel)
 
-  * `kebab-case` → arquivos e pastas
-  * `PascalCase` → classes e componentes
-  * `camelCase` → funções e variáveis
-* **Importações absolutas:** configuradas via `tsconfig.paths`
-* **Camadas isoladas:** nenhuma dependência do domínio em infra/presentation
-* **Code style:** ESLint + Prettier
-* **Commits:** Seguir convenção *Conventional Commits*
+```bash
+npm i -g vercel
+vercel login
+vercel --prod
+```
 
----
+Variáveis de ambiente:
 
-## 🧰 Comandos úteis
+* `NEXT_PUBLIC_API_URL`
+* `NEXT_PUBLIC_WS_URL`
+* `NEXT_PUBLIC_SUPABASE_URL`
+* `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-| Comando               | Descrição                          |
-| :-------------------- | :--------------------------------- |
-| `npm run dev`         | Roda todos os serviços em modo dev |
-| `npm run build`       | Compila todos os workspaces        |
-| `npm run test`        | Executa todos os testes            |
-| `npm run lint`        | Analisa código com ESLint          |
-| `npm run docker:up`   | Sobe serviços Docker               |
-| `npm run docker:down` | Encerra serviços Docker            |
-| `npm run db:migrate`  | Executa migrações do banco         |
-| `npm run db:seed`     | Insere dados iniciais              |
+### Backend (Railway ou Render)
 
----
+```bash
+npm i -g @railway/cli
+railway login
+railway up
+```
 
-## 🤝 Contribuição
+Variáveis de ambiente:
 
-Pull Requests são bem-vindos!
-Antes de contribuir:
+* `DATABASE_URL`
+* `REDIS_URL`
+* `JWT_SECRET`
+* `CORS_ORIGIN`
 
-1. Garanta que o código siga o style guide
-2. Adicione/atualize testes relevantes
-3. Rode `npm run lint && npm run test`
+### Banco de Dados (Supabase)
 
----
-
-## 🧩 Licença
-
-MIT © 2025 — Projeto **Catan MVP**
+* Crie um projeto em [supabase.com](https://supabase.com)
+* Copie a string de conexão e configure no `.env`
+* Rode `npm run db:migrate`
 
 ---
 
-## 🧭 Referências
+## 🧭 Convenções de Código
+
+* **Arquivos/Pastas:** `kebab-case`
+* **Classes e Componentes:** `PascalCase`
+* **Funções e Variáveis:** `camelCase`
+* **Constantes:** `UPPER_SNAKE_CASE`
+* **Importações:** Absolutas via `tsconfig.paths`
+
+Boas práticas:
+
+* Nenhuma dependência do domínio em infraestrutura.
+* Controladores finos (sem lógica de negócio).
+* DTOs para transferência de dados.
+* Testes isolados por camada.
+
+---
+
+## 🤝 Contribuindo
+
+Pull Requests são bem-vindos! Antes de enviar:
+
+1. Execute `npm run lint` e `npm run test`.
+2. Garanta que o código está formatado e testado.
+3. Descreva claramente sua alteração no PR.
+
+---
+
+## 📜 Licença
+
+Este projeto está licenciado sob a [MIT License](LICENSE).
+
+---
+
+## 📚 Referências
 
 * *Clean Architecture* — Robert C. Martin
 * *Domain-Driven Design* — Eric Evans
-* Supabase Docs — [supabase.com/docs](https://supabase.com/docs)
-
-```
-
----
-
-Deseja que eu gere esse `README.md` em um arquivo pronto para download (`readme.md`) com essa formatação?
-```
+* Supabase Docs — [https://supabase.com/docs](https://supabase.com/docs)
